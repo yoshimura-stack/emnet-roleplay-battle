@@ -54,3 +54,9 @@ Battle fighters are rendered inside the Three.js scene as layered cutouts with p
 ## V6.1
 - Roulette now uses dedicated character-focused artwork (`roulette_*.png`).
 - Full poster artwork (`fighter_*.png`) remains reserved for the VS confirmation cinematic.
+
+
+## V6.2
+- Center roster and judge thumbnails now always use original person photos.
+- Face-safe `object-fit: contain` prevents heads/faces from being cropped.
+- Fighter poster art remains reserved for roulette hero cards and VS confirmation.

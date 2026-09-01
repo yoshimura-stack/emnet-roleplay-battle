@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
   dataManagers.forEach(name => {
     const div = document.createElement('div');
     div.className = 'grid-item';
-    div.innerHTML = `<img src="${rouletteArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'"><div class="name-label">${name}</div>`;
+    div.innerHTML = `<img src="${personImage(name)}" class="roster-face" data-person="${name}" alt="${name}"><div class="name-label">${name}</div>`;
     iconGridTop.appendChild(div);
   });
 
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const div = document.createElement('div');
     div.className = 'grid-item';
     div.innerHTML = `
-      <img src="${rouletteArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'">
+      <img src="${personImage(name)}" class="roster-face" data-person="${name}" alt="${name}">
       <div class="eliminated-marker"><img src="eliminated.png" alt="eliminated"></div>
       <div class="name-label">${name}</div>
     `;
@@ -342,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     div.className = 'judge-item';
     div.dataset.name = name;
     div.innerHTML = `
-      <img src="${rouletteArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'">
+      <img src="${personImage(name)}" class="roster-face" data-person="${name}" alt="${name}">
       <div class="eliminated-marker"><img src="eliminated.png" alt="eliminated"></div>
       <div class="name-label">${name}</div>
     `;

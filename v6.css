@@ -64,3 +64,57 @@
   object-fit:cover!important;
   object-position:center 35%!important;
 }
+
+
+/* ===== V6.2 CENTER ROSTER FACE-SAFE LAYOUT ===== */
+/* The center candidate grids are utility UI: always show the person's face cleanly.
+   Fighter/poster art is reserved for roulette hero cards and the VS cinematic. */
+.grid-item > img.roster-face,
+.judge-item > img.roster-face{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  padding:2px 2px 20%!important;
+  box-sizing:border-box!important;
+  opacity:1!important;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255,255,255,.07), transparent 38%),
+    linear-gradient(180deg,#10131b,#05070b)!important;
+  filter:saturate(1.03) contrast(1.04)!important;
+}
+
+/* Portrait-specific nudges. These do not crop the image; they only improve visual centering. */
+.roster-face[data-person="芳村"]{object-position:center 45%!important}
+.roster-face[data-person="大森"]{object-position:center 44%!important}
+.roster-face[data-person="小嶋"]{object-position:center 42%!important}
+.roster-face[data-person="中和田"]{object-position:center 42%!important}
+.roster-face[data-person="荒木"]{object-position:center 40%!important}
+.roster-face[data-person="松谷"]{object-position:center 43%!important}
+.roster-face[data-person="深野"]{object-position:center 42%!important}
+.roster-face[data-person="國利"]{object-position:center 46%!important}
+.roster-face[data-person="矢澤"]{object-position:center 45%!important}
+.roster-face[data-person="小林"]{object-position:center 43%!important}
+.roster-face[data-person="藪"]{object-position:center 42%!important}
+.roster-face[data-person="山内"]{object-position:center 42%!important}
+.roster-face[data-person="佐藤"]{object-position:center 42%!important}
+.roster-face[data-person="修作"]{object-position:center 43%!important}
+
+/* Keep labels legible without covering the chin. */
+.grid-item .name-label,
+.judge-item .name-label{
+  min-height:20%;
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  background:linear-gradient(180deg,rgba(0,0,0,.58),rgba(0,0,0,.94))!important;
+  border-top:1px solid rgba(255,255,255,.15);
+}
+
+/* Override older fighter thumbnail rules in the center grid. */
+.grid-item .fighter-grid-art,
+.judge-item .fighter-grid-art{
+  object-fit:contain!important;
+  object-position:center center!important;
+}
