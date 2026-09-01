@@ -296,10 +296,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if(strategySe) strategySe.volume = 1.0;
 
   let isBgmPlaying = false;
+  const BGM_VOLUME_SELECT = 0.15;
+  const BGM_VOLUME_BATTLE = 0.04;
 
   const attemptPlayBgm = () => {
     if (!isBgmPlaying) {
-      bgmAudio.volume = 0.15; 
+      bgmAudio.volume = BGM_VOLUME_SELECT; 
       bgmAudio.play().then(() => {
         bgmBtn.textContent = '🔊';
         bgmBtn.style.color = '#fff';
@@ -755,6 +757,8 @@ document.addEventListener('DOMContentLoaded', () => {
       battleScreen.classList.remove('d-none');
       window.EMNETCore?.setPhase('strategy');
       window.EMNETCore?.emit('battle-enter');
+      // Keep background music very quiet during strategy/battle so voices and SE stay clear.
+      if (bgmAudio) bgmAudio.volume = BGM_VOLUME_BATTLE;
       
       document.getElementById('battle-p1-img').src = personImage(results[0]); 
       document.getElementById('battle-p1-name').textContent = results[0];
@@ -885,6 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
     isBattleActive = false;
     
     if (clashSe) clashSe.volume = 1.0;
+    if (bgmAudio) bgmAudio.volume = BGM_VOLUME_SELECT;
 
     document.getElementById('battle-screen').classList.add('d-none');
     document.getElementById('strategy-overlay').classList.add('d-none'); 

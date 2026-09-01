@@ -38,7 +38,24 @@
   mix-blend-mode: screen;
 }
 
-.select-screen > *, #battle-screen > * { position: relative; z-index: 2; }
+/* Keep the original layout positioning.
+   Do NOT force direct children to position:relative here: judge/sub panels and
+   background layers rely on position:absolute in style.css. */
+.select-screen > *, #battle-screen > * { z-index: 2; }
+
+/* Explicit stacking without changing positioning semantics */
+.select-screen .bg-layer, #battle-screen .battle-bg { z-index: 0 !important; }
+.select-screen .top-header,
+.select-screen .main-layout,
+.select-screen .judge-panel,
+.select-screen .sub-attacker-panel,
+.select-screen .bottom-controls,
+#battle-screen .battle-header,
+#battle-screen .battle-arena,
+#battle-screen .battle-judge-panel,
+#battle-screen .battle-sub-character,
+#battle-screen .battle-controls-wrapper,
+#battle-screen .battle-footer { z-index: 2; }
 
 .v2-brand {
   position: fixed;
@@ -131,4 +148,14 @@ body[data-visual-mode="vs"] .splash-vs-logo {
 @media (max-width: 1100px), (prefers-reduced-motion: reduce) {
   #three-stage { opacity: .72; }
   .left-panel .person-window, .right-panel .person-window { transform: none; }
+}
+
+/* ===== V2.1 layout safety for browser chrome / 16:9 projectors ===== */
+@media (min-width: 1100px) and (max-height: 900px) {
+  .top-header { padding-top: 8px; }
+  .main-layout { padding-top: 4px; padding-bottom: 4px; }
+  .side-panel { padding-bottom: 6px; }
+  .judge-panel { top: 8px; left: 16px; }
+  .sub-attacker-panel { top: 8px; right: 24px; }
+  .bottom-controls { padding-top: 7px; padding-bottom: 9px; }
 }
