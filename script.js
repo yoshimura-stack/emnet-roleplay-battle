@@ -151,7 +151,9 @@ class Slot {
   }
 
   startSpin() {
-    this.itemHeight = this.reel.firstElementChild.getBoundingClientRect().height;
+    // Use layout height, not getBoundingClientRect(): parent 3D transforms can distort
+    // the visual bounding box and accumulate large reel-stop errors over many items.
+    this.itemHeight = this.reel.firstElementChild.offsetHeight;
     this.reel.style.transition = 'none';
     this.reel.style.transform = `translateY(0px)`;
     
@@ -167,6 +169,8 @@ class Slot {
 
   stopSpin(duration, forceTargetText) {
     return new Promise((resolve) => {
+      // Re-read the untransformed layout height in case responsive CSS changed.
+      this.itemHeight = this.reel.firstElementChild?.offsetHeight || this.itemHeight;
       const style = window.getComputedStyle(this.reel);
       const transformString = style.transform;
       let currentY = 0;
@@ -193,9 +197,14 @@ class Slot {
       this.reel.style.transform = `translateY(${finalY}px)`;
       
       setTimeout(() => {
+        // Hard-snap to the exact item boundary after easing finishes. This prevents
+        // sub-pixel transition rounding from leaving the next card peeking through.
+        this.reel.style.transition = 'none';
+        this.reel.style.transform = `translateY(${finalY}px)`;
+        this.reel.offsetHeight;
         let selectedText = (this.type.includes('person')) ? this.reel.children[targetIndex].querySelector('.name-bg').textContent : this.reel.children[targetIndex].textContent;
         resolve(selectedText);
-      }, duration);
+      }, duration + 30);
     });
   }
 }
