@@ -494,6 +494,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   clashSe.play().catch(e => {});
                 }
                 
+                window.EMNETCore?.emit('battle-hit', { attacker: attackerType, damage, projectile: projectileSrc });
+
                 if (attackerType === 1) {
                   battleP2Hp -= damage;
                   if (battleP2Hp < 0) battleP2Hp = 0;

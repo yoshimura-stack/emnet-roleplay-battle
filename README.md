@@ -30,3 +30,7 @@ python -m http.server 8080
 
 ## Asset filename policy
 All deploy-time asset filenames are ASCII-only (lowercase letters, numbers, underscores, hyphens). Japanese display names remain unchanged inside the UI. This prevents filename encoding and case-sensitivity problems across Windows, GitHub, and Cloudflare Pages.
+
+
+## V4 True 3D Arena
+Battle fighters are rendered inside the Three.js scene as layered cutouts with parallax depth, animated camera, stage architecture, rim glow, and hit-reaction shock rings. DOM fighter images are hidden during battle while HUD/buttons remain HTML for reliability.

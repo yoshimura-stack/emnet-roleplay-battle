@@ -117,6 +117,10 @@
   cinematic.visible = false;
   scene.add(cinematic);
 
+  const battleWorld = new THREE.Group();
+  battleWorld.visible = false;
+  scene.add(battleWorld);
+
   const textureLoader = new THREE.TextureLoader();
   const clock = new THREE.Clock();
   let mode = 'idle';
@@ -124,6 +128,9 @@
   let fighterCards = [];
   let shockRings = [];
   let cameraShake = 0;
+  let currentMatch = null;
+  let battleFighters = [];
+  let battleBursts = [];
 
   const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
   const easeOutBack = t => {
@@ -221,6 +228,7 @@
   }
 
   function buildMatch(match) {
+    currentMatch = match;
     disposeGroup(cinematic);
     fighterCards = [];
     shockRings = [];
@@ -251,14 +259,141 @@
     addShockRing(0xffffff, 1.4);
   }
 
+
+  function makeCutout(name, imageUrl, accent, side = -1) {
+    const group = new THREE.Group();
+    const tex = textureLoader.load(imageUrl);
+    tex.colorSpace = THREE.SRGBColorSpace;
+
+    // Layered planes create a subtle volumetric/parallax silhouette instead of a flat DOM image.
+    for (let i = 0; i < 7; i++) {
+      const mat = new THREE.MeshBasicMaterial({
+        map: tex,
+        transparent: true,
+        alphaTest: 0.02,
+        toneMapped: false,
+        opacity: i === 6 ? 1 : 0.16,
+        color: i === 6 ? 0xffffff : accent,
+        blending: i === 6 ? THREE.NormalBlending : THREE.AdditiveBlending,
+        depthWrite: i === 6
+      });
+      const plane = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 5.8), mat);
+      plane.position.z = (i - 3) * 0.035;
+      plane.position.x = (i - 3) * 0.008 * side;
+      group.add(plane);
+    }
+
+    const halo = new THREE.Mesh(
+      new THREE.RingGeometry(1.8, 2.18, 96),
+      new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.22, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })
+    );
+    halo.position.set(0, -2.45, -0.35);
+    halo.rotation.x = -Math.PI / 2;
+    halo.scale.set(1.4, .55, 1);
+    group.add(halo);
+
+    const rim = new THREE.Mesh(
+      new THREE.PlaneGeometry(4.7, 6.3),
+      new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.10, blending: THREE.AdditiveBlending, depthWrite: false })
+    );
+    rim.position.z = -0.25;
+    group.add(rim);
+
+    const nameSprite = makeTextSprite(name, '#ffffff', `#${accent.toString(16).padStart(6,'0')}`, 68);
+    nameSprite.position.set(0, -3.0, 0.35);
+    nameSprite.scale.set(4.2, 0.92, 1);
+    group.add(nameSprite);
+    group.userData.halo = halo;
+    group.userData.side = side;
+    return group;
+  }
+
+  function buildBattle(match) {
+    currentMatch = match || currentMatch;
+    if (!currentMatch) return;
+    disposeGroup(battleWorld);
+    battleFighters = [];
+    battleBursts = [];
+    battleWorld.visible = true;
+    const img = name => (typeof window.personImage === 'function' ? window.personImage(name) : 'question.png');
+
+    const left = makeCutout(currentMatch.manager, img(currentMatch.manager), 0x31efff, -1);
+    left.position.set(-4.0, -0.10, 0.55);
+    left.rotation.y = 0.20;
+    left.rotation.z = -0.015;
+    battleWorld.add(left);
+
+    const right = makeCutout(currentMatch.main, img(currentMatch.main), 0xff31d6, 1);
+    right.position.set(4.0, -0.10, 0.55);
+    right.rotation.y = -0.20;
+    right.rotation.z = 0.015;
+    battleWorld.add(right);
+    battleFighters = [left, right];
+
+    // Stage architecture: raised platform, back wall light bars and center energy core.
+    const platform = new THREE.Mesh(
+      new THREE.CylinderGeometry(7.8, 8.5, 0.55, 64, 1, true),
+      new THREE.MeshStandardMaterial({ color: 0x080a12, metalness: 0.95, roughness: 0.20, emissive: 0x120722, emissiveIntensity: 0.7 })
+    );
+    platform.position.set(0, -3.05, -0.4);
+    battleWorld.add(platform);
+
+    for (let i=-5;i<=5;i++) {
+      const bar = new THREE.Mesh(
+        new THREE.BoxGeometry(0.07, 5.5, 0.07),
+        new THREE.MeshBasicMaterial({ color: i < 0 ? 0x22eaff : 0xff28d8, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending })
+      );
+      bar.position.set(i*1.0, 0.1, -4.4 - Math.abs(i)*0.05);
+      battleWorld.add(bar);
+    }
+
+    const core = new THREE.Mesh(
+      new THREE.TorusGeometry(1.45, 0.07, 10, 96),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.38, blending: THREE.AdditiveBlending, depthWrite: false })
+    );
+    core.position.set(0, -0.2, -1.5);
+    core.rotation.x = Math.PI / 2;
+    core.name = 'battleCore';
+    battleWorld.add(core);
+  }
+
+  function battleImpact(detail = {}) {
+    if (!battleWorld.visible) return;
+    cameraShake = detail.damage >= 50 ? 0.72 : detail.damage >= 30 ? 0.46 : 0.28;
+    const targetIndex = detail.attacker === 1 ? 1 : 0;
+    const target = battleFighters[targetIndex];
+    if (target) {
+      target.userData.hitUntil = performance.now() + 220;
+      target.userData.hitStrength = detail.damage || 10;
+      for (let i=0;i<3;i++) {
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(0.25, 0.31, 64),
+          new THREE.MeshBasicMaterial({ color: detail.attacker === 1 ? 0x31efff : 0xff31d6, transparent: true, opacity: .95, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })
+        );
+        ring.position.copy(target.position);
+        ring.position.z += 0.9 + i*0.05;
+        ring.userData.born = performance.now() + i*45;
+        battleWorld.add(ring);
+        battleBursts.push(ring);
+      }
+    }
+  }
+
   function setMode(next) {
     mode = next;
     modeStart = performance.now();
     document.body.dataset.visualMode = next;
     if (next === 'vs') cameraShake = 0.18;
-    if (next === 'battle' || next === 'idle') {
+    if (next === 'battle') {
       cinematic.visible = false;
       streaks.material.opacity = 0;
+      buildBattle(currentMatch);
+    } else if (next === 'idle') {
+      cinematic.visible = false;
+      battleWorld.visible = false;
+      streaks.material.opacity = 0;
+    } else {
+      battleWorld.visible = false;
     }
   }
 
@@ -332,9 +467,9 @@
       camera.position.y += (1.5 - camera.position.y) * 0.045;
       camera.position.x = Math.sin(t * 0.55) * 0.35;
     } else if (mode === 'battle') {
-      camera.position.z += (12.0 - camera.position.z) * 0.045;
-      camera.position.y += (1.5 - camera.position.y) * 0.045;
-      camera.position.x *= 0.9;
+      camera.position.z += (10.3 - camera.position.z) * 0.055;
+      camera.position.y += (0.72 - camera.position.y) * 0.055;
+      camera.position.x = Math.sin(t * 0.32) * 0.34;
     } else {
       camera.position.z += (12.8 - camera.position.z) * 0.04;
       camera.position.y += (1.4 - camera.position.y) * 0.04;
@@ -345,6 +480,33 @@
       camera.position.x += (Math.random() - 0.5) * cameraShake;
       camera.position.y += (Math.random() - 0.5) * cameraShake * 0.55;
       cameraShake *= 0.88;
+    }
+
+    if (mode === 'battle' && battleWorld.visible) {
+      battleFighters.forEach((fighter, i) => {
+        const side = i === 0 ? -1 : 1;
+        fighter.position.y = -0.10 + Math.sin(t * 1.7 + i * 1.2) * 0.055;
+        fighter.rotation.y = side * (-0.20 + Math.sin(t * 0.7 + i) * 0.018);
+        const hit = fighter.userData.hitUntil && now < fighter.userData.hitUntil;
+        const recoil = hit ? Math.sin((fighter.userData.hitUntil - now) * 0.09) * 0.18 : 0;
+        fighter.position.x = side * 4.0 + recoil * -side;
+        fighter.scale.setScalar(hit ? 1.035 : 1.0);
+        if (fighter.userData.halo) {
+          fighter.userData.halo.rotation.z += 0.008 * side;
+          fighter.userData.halo.material.opacity = hit ? 0.75 : 0.20 + (Math.sin(t * 3 + i) + 1) * 0.045;
+        }
+      });
+      const core = battleWorld.getObjectByName('battleCore');
+      if (core) { core.rotation.z += 0.01; core.scale.setScalar(1 + Math.sin(t*2.2)*0.05); }
+      battleBursts = battleBursts.filter(ring => {
+        const age = (now - ring.userData.born) / 1000;
+        if (age < 0) { ring.visible = false; return true; }
+        ring.visible = true;
+        ring.scale.setScalar(1 + age * 9);
+        ring.material.opacity = Math.max(0, .9 - age * 1.6);
+        if (age > .65) { battleWorld.remove(ring); ring.geometry.dispose(); ring.material.dispose(); return false; }
+        return true;
+      });
     }
 
     cyanLight.intensity = 46 + Math.sin(t * 3.0) * 9;
@@ -365,8 +527,9 @@
   addEventListener('emnet:selection-revealed', e => { buildMatch(e.detail || {}); setMode('reveal'); });
   addEventListener('emnet:vs-start', () => setMode('vs'));
   addEventListener('emnet:battle-enter', () => setMode('battle'));
+  addEventListener('emnet:battle-hit', e => battleImpact(e.detail || {}));
   addEventListener('emnet:back-select', () => setMode('idle'));
   addEventListener('emnet:reset', () => setMode('idle'));
 
-  window.EMNET3D = { setMode, buildMatch };
+  window.EMNET3D = { setMode, buildMatch, buildBattle, battleImpact };
 })();

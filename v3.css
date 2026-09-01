@@ -25,3 +25,51 @@ body[data-visual-mode="spin"] .right-panel .player-tag { text-shadow: 0 0 10px c
   body[data-visual-mode="reveal"] #three-stage,
   body[data-visual-mode="vs"] #three-stage { opacity: .92; }
 }
+
+
+/* ===== V4 TRUE 3D BATTLE ARENA ===== */
+body[data-visual-mode="battle"] #three-stage {
+  z-index: 49;
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 45%, rgba(0,235,255,.11), transparent 31%),
+    radial-gradient(circle at 82% 45%, rgba(255,0,210,.13), transparent 31%),
+    linear-gradient(180deg, #01020a 0%, #03020a 58%, #000 100%);
+}
+body[data-visual-mode="battle"] #battle-screen { background: transparent !important; }
+body[data-visual-mode="battle"] #battle-screen .battle-bg {
+  opacity: .12 !important;
+  filter: brightness(.28) contrast(1.7) saturate(.35) blur(1px) !important;
+  mix-blend-mode: screen;
+}
+body[data-visual-mode="battle"] #battle-screen .battle-arena .main-fighter-img {
+  opacity: 0 !important;
+}
+body[data-visual-mode="battle"] #battle-screen .battle-arena {
+  background: transparent !important;
+}
+body[data-visual-mode="battle"] #battle-screen::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:3;
+  background:
+    radial-gradient(ellipse at 50% 88%, rgba(255,255,255,.055), transparent 34%),
+    linear-gradient(90deg, rgba(0,240,255,.06), transparent 24%, transparent 76%, rgba(255,0,210,.06));
+  mix-blend-mode:screen;
+}
+body[data-visual-mode="battle"] .battle-header,
+body[data-visual-mode="battle"] .battle-judge-panel,
+body[data-visual-mode="battle"] .battle-sub-character,
+body[data-visual-mode="battle"] .battle-controls-wrapper,
+body[data-visual-mode="battle"] .battle-footer,
+body[data-visual-mode="battle"] #round-animation-overlay,
+body[data-visual-mode="battle"] #strategy-overlay { position: relative; z-index: 60; }
+body[data-visual-mode="battle"] .battle-judge-panel,
+body[data-visual-mode="battle"] .battle-sub-character,
+body[data-visual-mode="battle"] .battle-controls-wrapper,
+body[data-visual-mode="battle"] .battle-footer,
+body[data-visual-mode="battle"] #round-animation-overlay,
+body[data-visual-mode="battle"] #strategy-overlay { position: absolute; }
+.v2-brand::after { content: " · TRUE 3D ARENA" !important; }
