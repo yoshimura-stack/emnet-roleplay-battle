@@ -34,3 +34,11 @@ All deploy-time asset filenames are ASCII-only (lowercase letters, numbers, unde
 
 ## V4 True 3D Arena
 Battle fighters are rendered inside the Three.js scene as layered cutouts with parallax depth, animated camera, stage architecture, rim glow, and hit-reaction shock rings. DOM fighter images are hidden during battle while HUD/buttons remain HTML for reliability.
+
+
+## V5 Comic Fighter System
+- Fighter profiles for 芳村 / 大森 / 小嶋 / 荒木
+- Codenames, archetypes, taglines and fighter-specific move labels
+- Perspective-heavy Three.js arena with deep tunnel frames, octagonal platform, energy towers and 3D camera orbit
+- Comic-book HUD / halftone styling
+- Existing game logic and Cloudflare/GitHub deployment flow preserved

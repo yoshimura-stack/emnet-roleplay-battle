@@ -45,6 +45,32 @@ function personImage(name) {
 window.PERSON_IMAGE = PERSON_IMAGE;
 window.personImage = personImage;
 
+function applyFighterIdentity(p1Name, p2Name) {
+  const p1 = window.getFighterProfile ? window.getFighterProfile(p1Name) : null;
+  const p2 = window.getFighterProfile ? window.getFighterProfile(p2Name) : null;
+  if (!p1 || !p2) return;
+
+  document.documentElement.style.setProperty('--p1-accent', p1.accent);
+  document.documentElement.style.setProperty('--p1-accent2', p1.accent2);
+  document.documentElement.style.setProperty('--p2-accent', p2.accent);
+  document.documentElement.style.setProperty('--p2-accent2', p2.accent2);
+
+  const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value || ''; };
+  setText('fighter-codename-p1', p1.codename);
+  setText('fighter-archetype-p1', p1.archetype);
+  setText('fighter-tagline-p1', p1.tagline);
+  setText('fighter-codename-p2', p2.codename);
+  setText('fighter-archetype-p2', p2.archetype);
+  setText('fighter-tagline-p2', p2.tagline);
+
+  const p1Buttons = [...document.querySelectorAll('.p1-controls .attack-btn')];
+  const p2Buttons = [...document.querySelectorAll('.p2-controls .attack-btn')];
+  p1Buttons.forEach((btn, i) => { if (p1.moves?.[i]) btn.textContent = p1.moves[i]; });
+  p2Buttons.forEach((btn, i) => { if (p2.moves?.[i]) btn.textContent = p2.moves[i]; });
+
+  window.EMNETCore?.emit('fighter-profile', { p1Name, p2Name, p1, p2 });
+}
+
 let usedPresenters = JSON.parse(localStorage.getItem('slot_used_presenters')) || [];
 let usedAgencies = JSON.parse(localStorage.getItem('slot_used_agencies')) || [];
 let usedJudges = JSON.parse(localStorage.getItem('slot_used_judges')) || [];
@@ -779,6 +805,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       document.getElementById('battle-p2-img').src = personImage(results[1]); 
       document.getElementById('battle-p2-name').textContent = results[1];
+      applyFighterIdentity(results[0], results[1]);
       
       document.getElementById('battle-sub-img').src = personImage(results[2]);
       document.getElementById('battle-sub-name').textContent = results[2];
@@ -817,11 +844,6 @@ document.addEventListener('DOMContentLoaded', () => {
         strategySe.currentTime = 0;
         strategySe.play().catch(e => {});
         
-        let boost1 = new Audio(strategySe.src);
-        let boost2 = new Audio(strategySe.src);
-        boost1.play().catch(e=>{});
-        boost2.play().catch(e=>{});
-
         let prevVol = bgmAudio.volume;
         bgmAudio.volume = 0.02; 
         setTimeout(() => {

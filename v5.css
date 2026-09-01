@@ -1,0 +1,63 @@
+/* ===== V5 COMIC FIGHTER SYSTEM ===== */
+:root { --p1-accent:#19e6ff; --p1-accent2:#006bff; --p2-accent:#d92cff; --p2-accent2:#7028ff; }
+.v2-brand::after { content:" · V5 COMIC FIGHTER SYSTEM" !important; }
+
+body[data-visual-mode="battle"] #battle-screen::before {
+  content:""; position:absolute; inset:0; z-index:4; pointer-events:none; opacity:.16;
+  background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,.75) 1px, transparent 1.4px);
+  background-size:7px 7px; mix-blend-mode:overlay;
+}
+body[data-visual-mode="battle"] #battle-screen::after {
+  z-index:5 !important;
+  background:
+    linear-gradient(108deg, color-mix(in srgb, var(--p1-accent) 11%, transparent) 0 22%, transparent 22% 78%, color-mix(in srgb, var(--p2-accent) 11%, transparent) 78%),
+    radial-gradient(ellipse at 50% 78%, rgba(255,255,255,.08), transparent 34%) !important;
+}
+
+.fighter-identity {
+  position:absolute; z-index:65; top:76px; width:min(30vw,520px); pointer-events:none;
+  text-transform:uppercase; font-family:Impact,"Arial Black",sans-serif; font-style:italic; line-height:.86;
+}
+.fighter-identity.p1 { left:24px; text-align:left; color:var(--p1-accent); }
+.fighter-identity.p2 { right:24px; text-align:right; color:var(--p2-accent); }
+.fighter-codename { font-size:clamp(26px,3vw,58px); letter-spacing:.04em; text-shadow:0 0 22px currentColor, 5px 7px 0 #000; }
+.fighter-archetype { margin-top:10px; color:#fff; font:900 clamp(10px,1vw,17px)/1.1 Arial,sans-serif; letter-spacing:.2em; opacity:.82; }
+.fighter-tagline { margin-top:9px; color:#e9edf5; font:700 clamp(10px,.9vw,15px)/1.3 Arial,sans-serif; letter-spacing:.03em; opacity:.72; }
+
+.battle-header { z-index:80 !important; }
+.hp-bar-container { transform:skewX(-11deg); overflow:hidden; border:2px solid rgba(255,255,255,.9); box-shadow:0 0 16px rgba(255,255,255,.15); }
+.left-hp .hp-bar { background:linear-gradient(90deg,var(--p1-accent2),var(--p1-accent),#fff) !important; box-shadow:0 0 24px var(--p1-accent); }
+.right-hp .hp-bar { background:linear-gradient(90deg,#fff,var(--p2-accent),var(--p2-accent2)) !important; box-shadow:0 0 24px var(--p2-accent); }
+.hp-name { font-family:Impact,"Arial Black",sans-serif !important; font-style:italic; letter-spacing:.04em; }
+.p1-text { color:var(--p1-accent) !important; }
+.p2-text { color:var(--p2-accent) !important; }
+
+.battle-timer { position:relative; color:#fff !important; text-shadow:0 0 16px #fff, 0 5px 0 #000 !important; }
+.battle-timer::after { content:"MATCH TIME"; position:absolute; left:50%; top:90%; transform:translateX(-50%); font:800 9px/1 Arial,sans-serif; letter-spacing:.22em; color:#ffd52a; white-space:nowrap; text-shadow:none; }
+
+.battle-controls-wrapper { z-index:90 !important; }
+.player-controls { gap:8px !important; }
+.attack-btn {
+  min-width:112px; clip-path:polygon(8% 0,100% 0,92% 100%,0 100%); border:1px solid rgba(255,255,255,.75) !important;
+  background:linear-gradient(135deg,rgba(5,8,14,.96),rgba(16,19,28,.86)) !important;
+  font-family:Impact,"Arial Black",sans-serif !important; font-style:italic; letter-spacing:.035em; text-transform:uppercase;
+  box-shadow:inset 0 0 22px rgba(255,255,255,.04),0 7px 0 rgba(0,0,0,.45) !important;
+}
+.p1-btn { border-left:5px solid var(--p1-accent) !important; text-shadow:0 0 8px var(--p1-accent); }
+.p2-btn { border-right:5px solid var(--p2-accent) !important; text-shadow:0 0 8px var(--p2-accent); }
+.attack-btn.sp-btn { color:#fff54b !important; border-color:#ffd928 !important; transform:scale(1.04); }
+
+#battle-agency-label { font-family:Impact,"Arial Black",sans-serif; font-style:italic; letter-spacing:.08em; text-shadow:0 0 18px #fff; }
+
+.v5-versus-slash { position:absolute; z-index:54; left:50%; top:50%; width:5px; height:54vh; transform:translate(-50%,-48%) rotate(14deg); background:linear-gradient(transparent,#fff 20%,#ffd625 48%,#fff 75%,transparent); box-shadow:0 0 25px #ffd625,0 0 70px #ff7424; opacity:.45; pointer-events:none; }
+
+/* Character select gets comic framing without changing slot math. */
+.select-screen::after { content:""; position:absolute; inset:0; pointer-events:none; z-index:2; opacity:.07; background-image:radial-gradient(circle,#fff 1px,transparent 1.2px); background-size:8px 8px; }
+.side-panel,.center-panel,.judge-panel,.sub-attacker-panel,.bottom-controls,.top-header { z-index:10; }
+.person-window { box-shadow:0 0 0 1px rgba(255,255,255,.12),0 20px 45px rgba(0,0,0,.55),inset 0 0 40px rgba(255,255,255,.025) !important; }
+
+@media (max-width:1100px){
+  .fighter-identity { top:64px; width:34vw; }
+  .fighter-tagline { display:none; }
+  .attack-btn { min-width:88px; font-size:12px !important; }
+}

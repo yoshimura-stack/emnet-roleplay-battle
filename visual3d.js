@@ -308,6 +308,14 @@
     return group;
   }
 
+  function profileFor(name) {
+    return window.getFighterProfile ? window.getFighterProfile(name) : { codename:name, accent:'#ffffff', accent2:'#888888' };
+  }
+
+  function colorInt(hex, fallback) {
+    try { return parseInt(String(hex).replace('#',''),16); } catch(e) { return fallback; }
+  }
+
   function buildBattle(match) {
     currentMatch = match || currentMatch;
     if (!currentMatch) return;
@@ -316,45 +324,119 @@
     battleBursts = [];
     battleWorld.visible = true;
     const img = name => (typeof window.personImage === 'function' ? window.personImage(name) : 'question.png');
+    const p1 = profileFor(currentMatch.manager);
+    const p2 = profileFor(currentMatch.main);
+    const c1 = colorInt(p1.accent, 0x31efff);
+    const c2 = colorInt(p2.accent, 0xff31d6);
 
-    const left = makeCutout(currentMatch.manager, img(currentMatch.manager), 0x31efff, -1);
-    left.position.set(-4.0, -0.10, 0.55);
-    left.rotation.y = 0.20;
-    left.rotation.z = -0.015;
-    battleWorld.add(left);
-
-    const right = makeCutout(currentMatch.main, img(currentMatch.main), 0xff31d6, 1);
-    right.position.set(4.0, -0.10, 0.55);
-    right.rotation.y = -0.20;
-    right.rotation.z = 0.015;
-    battleWorld.add(right);
-    battleFighters = [left, right];
-
-    // Stage architecture: raised platform, back wall light bars and center energy core.
-    const platform = new THREE.Mesh(
-      new THREE.CylinderGeometry(7.8, 8.5, 0.55, 64, 1, true),
-      new THREE.MeshStandardMaterial({ color: 0x080a12, metalness: 0.95, roughness: 0.20, emissive: 0x120722, emissiveIntensity: 0.7 })
-    );
-    platform.position.set(0, -3.05, -0.4);
-    battleWorld.add(platform);
-
-    for (let i=-5;i<=5;i++) {
-      const bar = new THREE.Mesh(
-        new THREE.BoxGeometry(0.07, 5.5, 0.07),
-        new THREE.MeshBasicMaterial({ color: i < 0 ? 0x22eaff : 0xff28d8, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending })
-      );
-      bar.position.set(i*1.0, 0.1, -4.4 - Math.abs(i)*0.05);
-      battleWorld.add(bar);
+    // Deep arena tunnel: repeating frames make perspective obvious even on a flat monitor.
+    for (let z=-5; z>=-32; z-=3.2) {
+      const depth = Math.abs(z);
+      const w = 12.5 + depth * 0.22;
+      const h = 7.0 + depth * 0.08;
+      const frameGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(w, h, 0.08));
+      const frame = new THREE.LineSegments(frameGeo, new THREE.LineBasicMaterial({
+        color: z % 6.4 === 0 ? c1 : c2, transparent:true, opacity:Math.max(.035,.20-depth*.004), blending:THREE.AdditiveBlending
+      }));
+      frame.position.set(0,.05,z);
+      battleWorld.add(frame);
     }
 
-    const core = new THREE.Mesh(
-      new THREE.TorusGeometry(1.45, 0.07, 10, 96),
-      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.38, blending: THREE.AdditiveBlending, depthWrite: false })
+    // Raised octagonal fighting platform.
+    const platform = new THREE.Mesh(
+      new THREE.CylinderGeometry(8.6, 9.5, 0.8, 8, 1, false),
+      new THREE.MeshStandardMaterial({ color:0x060811, metalness:.96, roughness:.18, emissive:0x10051a, emissiveIntensity:.8 })
     );
-    core.position.set(0, -0.2, -1.5);
-    core.rotation.x = Math.PI / 2;
-    core.name = 'battleCore';
+    platform.position.set(0,-3.08,-1.2);
+    platform.rotation.y = Math.PI/8;
+    battleWorld.add(platform);
+
+    const platformRing = new THREE.Mesh(
+      new THREE.TorusGeometry(7.6,.075,8,128),
+      new THREE.MeshBasicMaterial({ color:0xffd447, transparent:true, opacity:.55, blending:THREE.AdditiveBlending })
+    );
+    platformRing.rotation.x=Math.PI/2;
+    platformRing.position.set(0,-2.68,-1.2);
+    platformRing.scale.set(1,.58,1);
+    battleWorld.add(platformRing);
+
+    // Perspective floor lanes shooting toward the vanishing point.
+    for (let i=-9;i<=9;i++) {
+      const lane = new THREE.Mesh(
+        new THREE.PlaneGeometry(.025,30),
+        new THREE.MeshBasicMaterial({ color:i<0?c1:c2, transparent:true, opacity:.12, blending:THREE.AdditiveBlending })
+      );
+      lane.rotation.x=-Math.PI/2;
+      lane.position.set(i*.82,-2.66,-11.5);
+      battleWorld.add(lane);
+    }
+
+    // Vertical energy towers give the stage real height.
+    for (const side of [-1,1]) {
+      const color = side<0?c1:c2;
+      for (let i=0;i<5;i++) {
+        const tower = new THREE.Mesh(
+          new THREE.BoxGeometry(.16, 3.2+i*.7, .16),
+          new THREE.MeshStandardMaterial({ color:0x080b12, metalness:.9, roughness:.18, emissive:color, emissiveIntensity:1.7 })
+        );
+        tower.position.set(side*(5.6+i*.95), -1.5+i*.12, -3.8-i*1.3);
+        battleWorld.add(tower);
+        const cap = new THREE.PointLight(color, 18, 5.5, 2);
+        cap.position.set(tower.position.x, tower.position.y+2, tower.position.z+.8);
+        battleWorld.add(cap);
+      }
+    }
+
+    // Fighters live at different depths and turn toward each other.
+    const left = makeCutout(currentMatch.manager, img(currentMatch.manager), c1, -1);
+    left.position.set(-3.65,-.04,1.15);
+    left.rotation.y=.34;
+    left.rotation.x=-.025;
+    left.scale.setScalar(1.18);
+    left.userData.home = left.position.clone();
+    left.userData.codename = p1.codename;
+    battleWorld.add(left);
+
+    const right = makeCutout(currentMatch.main, img(currentMatch.main), c2, 1);
+    right.position.set(3.85,.02,.15);
+    right.rotation.y=-.34;
+    right.rotation.x=.018;
+    right.scale.setScalar(1.12);
+    right.userData.home = right.position.clone();
+    right.userData.codename = p2.codename;
+    battleWorld.add(right);
+    battleFighters=[left,right];
+
+    // Comic-energy backplates sit behind, visibly tilted in 3D.
+    for (const [side,color,x,z] of [[-1,c1,-4.3,.25],[1,c2,4.45,-.75]]) {
+      const plate = new THREE.Mesh(
+        new THREE.PlaneGeometry(5.4,6.6),
+        new THREE.MeshBasicMaterial({color,transparent:true,opacity:.055,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false})
+      );
+      plate.position.set(x,.0,z-.75);
+      plate.rotation.y=side*-.50;
+      plate.rotation.z=side*.06;
+      battleWorld.add(plate);
+    }
+
+    const core = new THREE.Group();
+    core.name='battleCore';
+    for (let i=0;i<4;i++) {
+      const ring=new THREE.Mesh(
+        new THREE.TorusGeometry(1.1+i*.35,.035+i*.012,8,96),
+        new THREE.MeshBasicMaterial({color:i%2?c1:c2,transparent:true,opacity:.34-i*.04,blending:THREE.AdditiveBlending,depthWrite:false})
+      );
+      ring.rotation.x=Math.PI/2 + i*.12;
+      ring.rotation.y=i*.38;
+      core.add(ring);
+    }
+    core.position.set(0,-.35,-2.1);
     battleWorld.add(core);
+
+    const p1Name = makeTextSprite(p1.codename || currentMatch.manager,'#ffffff',p1.accent || '#19e6ff',58);
+    p1Name.position.set(-4.0,-2.58,2.0); p1Name.scale.set(4.8,.85,1); p1Name.rotation.z=-.025; battleWorld.add(p1Name);
+    const p2Name = makeTextSprite(p2.codename || currentMatch.main,'#ffffff',p2.accent || '#d92cff',58);
+    p2Name.position.set(4.0,-2.58,1.0); p2Name.scale.set(4.8,.85,1); p2Name.rotation.z=.025; battleWorld.add(p2Name);
   }
 
   function battleImpact(detail = {}) {
@@ -467,9 +549,13 @@
       camera.position.y += (1.5 - camera.position.y) * 0.045;
       camera.position.x = Math.sin(t * 0.55) * 0.35;
     } else if (mode === 'battle') {
-      camera.position.z += (10.3 - camera.position.z) * 0.055;
-      camera.position.y += (0.72 - camera.position.y) * 0.055;
-      camera.position.x = Math.sin(t * 0.32) * 0.34;
+      // Slow cinematic orbit: perspective must be visible, not a flat front-on composition.
+      const targetX = Math.sin(t * 0.23) * 1.05;
+      const targetY = 0.48 + Math.sin(t * 0.31) * 0.12;
+      const targetZ = 9.0 + Math.cos(t * 0.19) * 0.45;
+      camera.position.x += (targetX - camera.position.x) * 0.035;
+      camera.position.y += (targetY - camera.position.y) * 0.035;
+      camera.position.z += (targetZ - camera.position.z) * 0.035;
     } else {
       camera.position.z += (12.8 - camera.position.z) * 0.04;
       camera.position.y += (1.4 - camera.position.y) * 0.04;
@@ -485,12 +571,15 @@
     if (mode === 'battle' && battleWorld.visible) {
       battleFighters.forEach((fighter, i) => {
         const side = i === 0 ? -1 : 1;
-        fighter.position.y = -0.10 + Math.sin(t * 1.7 + i * 1.2) * 0.055;
-        fighter.rotation.y = side * (-0.20 + Math.sin(t * 0.7 + i) * 0.018);
+        const home = fighter.userData.home || new THREE.Vector3(side*3.8,0,i?0.15:1.15);
+        fighter.position.y = home.y + Math.sin(t * 1.7 + i * 1.2) * 0.065;
+        fighter.rotation.y = side * (-0.34 + Math.sin(t * 0.7 + i) * 0.025);
         const hit = fighter.userData.hitUntil && now < fighter.userData.hitUntil;
-        const recoil = hit ? Math.sin((fighter.userData.hitUntil - now) * 0.09) * 0.18 : 0;
-        fighter.position.x = side * 4.0 + recoil * -side;
-        fighter.scale.setScalar(hit ? 1.035 : 1.0);
+        const recoil = hit ? Math.sin((fighter.userData.hitUntil - now) * 0.09) * 0.26 : 0;
+        fighter.position.x = home.x + recoil * -side;
+        fighter.position.z = home.z + (hit ? Math.abs(recoil)*.7 : 0);
+        const baseScale = i===0 ? 1.18 : 1.12;
+        fighter.scale.setScalar(hit ? baseScale*1.045 : baseScale);
         if (fighter.userData.halo) {
           fighter.userData.halo.rotation.z += 0.008 * side;
           fighter.userData.halo.material.opacity = hit ? 0.75 : 0.20 + (Math.sin(t * 3 + i) + 1) * 0.045;
