@@ -49,3 +49,8 @@ Battle fighters are rendered inside the Three.js scene as layered cutouts with p
 - STOP triggers an "awakening" flash / zoom / codename punch-in.
 - VS splash uses comic fighter art for supported characters.
 - Unsupported members automatically fall back to the existing photo assets.
+
+
+## V6.1
+- Roulette now uses dedicated character-focused artwork (`roulette_*.png`).
+- Full poster artwork (`fighter_*.png`) remains reserved for the VS confirmation cinematic.

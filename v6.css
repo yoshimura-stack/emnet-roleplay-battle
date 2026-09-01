@@ -40,3 +40,27 @@
 #slot-manager::after,#slot-main-attacker::after{content:"";position:absolute;inset:0;z-index:8;pointer-events:none;background:linear-gradient(90deg,rgba(0,255,255,.11),transparent 18% 82%,rgba(255,0,238,.11));mix-blend-mode:screen}
 
 @media(max-width:1100px){.fighter-slot-item .fighter-slot-code{font-size:26px;bottom:39px}.fighter-slot-item-sub .fighter-slot-code{font-size:13px;bottom:25px}}
+
+
+/* ===== V6.1 ROULETTE CHARACTER-ONLY ART ===== */
+.fighter-slot-item .fighter-slot-art{
+  object-fit:contain!important;
+  object-position:center bottom!important;
+  transform:scale(1.06)!important;
+  padding:4% 5% 0!important;
+  filter:saturate(1.18) contrast(1.08) drop-shadow(0 12px 22px rgba(0,0,0,.75))!important;
+}
+.fighter-slot-item{
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255,255,255,.08), transparent 28%),
+    linear-gradient(180deg,#080b12 0%,#03040a 100%)!important;
+}
+.fighter-slot-item .fighter-slot-shade{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.02) 56%,rgba(0,0,0,.22) 72%,rgba(0,0,0,.92) 100%),
+    radial-gradient(circle at 50% 45%,transparent 0 45%,rgba(0,0,0,.34) 100%)!important;
+}
+.grid-item .fighter-grid-art{
+  object-fit:cover!important;
+  object-position:center 35%!important;
+}

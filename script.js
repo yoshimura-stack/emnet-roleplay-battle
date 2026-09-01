@@ -53,6 +53,18 @@ function hasFighterArt(name) {
 }
 
 window.fighterArt = fighterArt;
+
+const ROULETTE_ART = {
+  '芳村': 'roulette_yoshimura.png',
+  '大森': 'roulette_omori.png',
+  '小嶋': 'roulette_kojima.png',
+  '荒木': 'roulette_araki.png'
+};
+function rouletteArt(name) {
+  return ROULETTE_ART[name] || personImage(name);
+}
+window.rouletteArt = rouletteArt;
+
 window.hasFighterArt = hasFighterArt;
 
 window.PERSON_IMAGE = PERSON_IMAGE;
@@ -184,7 +196,7 @@ class Slot {
         div.className = `person-item${fighter ? ' fighter-slot-item' : ''}`;
         div.dataset.name = text;
         div.innerHTML = fighter
-          ? `<img class="fighter-slot-art" src="${fighterArt(text)}" onerror="this.src='${personImage(text)}'">
+          ? `<img class="fighter-slot-art" src="${rouletteArt(text)}" onerror="this.src='${personImage(text)}'">
              <div class="fighter-slot-shade"></div>
              <div class="fighter-slot-code">${profile.codename}</div>
              <div class="name-bg">${text}</div>`
@@ -195,7 +207,7 @@ class Slot {
         div.className = `person-item-sub${fighter ? ' fighter-slot-item fighter-slot-item-sub' : ''}`;
         div.dataset.name = text;
         div.innerHTML = fighter
-          ? `<img class="fighter-slot-art" src="${fighterArt(text)}" onerror="this.src='${personImage(text)}'">
+          ? `<img class="fighter-slot-art" src="${rouletteArt(text)}" onerror="this.src='${personImage(text)}'">
              <div class="fighter-slot-shade"></div>
              <div class="fighter-slot-code">${profile.codename}</div>
              <div class="name-bg">${text}</div>`
@@ -307,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
   dataManagers.forEach(name => {
     const div = document.createElement('div');
     div.className = 'grid-item';
-    div.innerHTML = `<img src="${fighterArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'"><div class="name-label">${name}</div>`;
+    div.innerHTML = `<img src="${rouletteArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'"><div class="name-label">${name}</div>`;
     iconGridTop.appendChild(div);
   });
 
@@ -315,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const div = document.createElement('div');
     div.className = 'grid-item';
     div.innerHTML = `
-      <img src="${fighterArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'">
+      <img src="${rouletteArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'">
       <div class="eliminated-marker"><img src="eliminated.png" alt="eliminated"></div>
       <div class="name-label">${name}</div>
     `;
@@ -330,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     div.className = 'judge-item';
     div.dataset.name = name;
     div.innerHTML = `
-      <img src="${fighterArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'">
+      <img src="${rouletteArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'">
       <div class="eliminated-marker"><img src="eliminated.png" alt="eliminated"></div>
       <div class="name-label">${name}</div>
     `;
