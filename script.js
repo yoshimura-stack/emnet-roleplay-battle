@@ -42,6 +42,30 @@ function personImage(name) {
   return PERSON_IMAGE[name] || 'question.png';
 }
 
+// V6.4: dedicated face-centered, consistently-cropped photos for the center
+// roster grid and judge grid only. VS splash / battle screens keep using the
+// original personImage() photos, which are framed for a larger dramatic shot.
+const ROSTER_FACE_IMAGE = Object.freeze({
+  '芳村': 'face_yoshimura.png',
+  '大森': 'face_omori.png',
+  '小嶋': 'face_kojima.png',
+  '中和田': 'face_nakawada.png',
+  '荒木': 'face_araki.png',
+  '松谷': 'face_matsutani.png',
+  '深野': 'face_fukano.png',
+  '國利': 'face_kunitoshi.png',
+  '矢澤': 'face_yazawa.png',
+  '小林': 'face_kobayashi.png',
+  '藪': 'face_yabu.png',
+  '山内': 'face_yamauchi.png',
+  '佐藤': 'face_sato.png',
+  '修作': 'face_shusaku.png'
+});
+function rosterFaceImage(name) {
+  return ROSTER_FACE_IMAGE[name] || personImage(name);
+}
+window.rosterFaceImage = rosterFaceImage;
+
 function fighterArt(name) {
   const profile = window.getFighterProfile ? window.getFighterProfile(name) : null;
   return profile?.art || personImage(name);
@@ -319,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
   dataManagers.forEach(name => {
     const div = document.createElement('div');
     div.className = 'grid-item';
-    div.innerHTML = `<img src="${personImage(name)}" class="roster-face" data-person="${name}" alt="${name}"><div class="name-label">${name}</div>`;
+    div.innerHTML = `<img src="${rosterFaceImage(name)}" class="roster-face" data-person="${name}" alt="${name}"><div class="name-label">${name}</div>`;
     iconGridTop.appendChild(div);
   });
 
@@ -327,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const div = document.createElement('div');
     div.className = 'grid-item';
     div.innerHTML = `
-      <img src="${personImage(name)}" class="roster-face" data-person="${name}" alt="${name}">
+      <img src="${rosterFaceImage(name)}" class="roster-face" data-person="${name}" alt="${name}">
       <div class="eliminated-marker"><img src="eliminated.png" alt="eliminated"></div>
       <div class="name-label">${name}</div>
     `;
@@ -342,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     div.className = 'judge-item';
     div.dataset.name = name;
     div.innerHTML = `
-      <img src="${personImage(name)}" class="roster-face" data-person="${name}" alt="${name}">
+      <img src="${rosterFaceImage(name)}" class="roster-face" data-person="${name}" alt="${name}">
       <div class="eliminated-marker"><img src="eliminated.png" alt="eliminated"></div>
       <div class="name-label">${name}</div>
     `;
