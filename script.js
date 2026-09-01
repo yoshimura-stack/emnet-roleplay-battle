@@ -42,6 +42,9 @@ function personImage(name) {
   return PERSON_IMAGE[name] || 'question.png';
 }
 
+window.PERSON_IMAGE = PERSON_IMAGE;
+window.personImage = personImage;
+
 let usedPresenters = JSON.parse(localStorage.getItem('slot_used_presenters')) || [];
 let usedAgencies = JSON.parse(localStorage.getItem('slot_used_agencies')) || [];
 let usedJudges = JSON.parse(localStorage.getItem('slot_used_judges')) || [];

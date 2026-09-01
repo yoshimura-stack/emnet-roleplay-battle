@@ -1,4 +1,4 @@
-/* EMNET Event Game Core - 3D presentation layer */
+/* EMNET Event Game Core - V3 Three.js cinematic layer */
 (() => {
   const host = document.getElementById('three-stage');
   if (!host || !window.THREE) {
@@ -8,116 +8,349 @@
 
   const THREE = window.THREE;
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x030308, 0.035);
+  scene.fog = new THREE.FogExp2(0x02030a, 0.028);
 
-  const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 120);
-  camera.position.set(0, 3.1, 12.5);
+  const camera = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 0.1, 160);
+  camera.position.set(0, 1.4, 12.8);
 
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
   host.appendChild(renderer.domElement);
 
-  const group = new THREE.Group();
-  scene.add(group);
+  scene.add(new THREE.AmbientLight(0x8899bb, 0.55));
+  const cyanLight = new THREE.PointLight(0x37f3ff, 55, 20, 1.8);
+  cyanLight.position.set(-5, 2.5, 4);
+  scene.add(cyanLight);
+  const magentaLight = new THREE.PointLight(0xff2ad8, 55, 20, 1.8);
+  magentaLight.position.set(5, 2.5, 4);
+  scene.add(magentaLight);
+  const topLight = new THREE.PointLight(0xffffff, 24, 18, 2);
+  topLight.position.set(0, 7, 3);
+  scene.add(topLight);
 
-  // Futuristic arena floor
-  const grid = new THREE.GridHelper(38, 38, 0x00eaff, 0x3c145f);
-  grid.position.y = -3.3;
+  const world = new THREE.Group();
+  scene.add(world);
+
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(45, 40),
+    new THREE.MeshStandardMaterial({ color: 0x050711, metalness: 0.86, roughness: 0.24, transparent: true, opacity: 0.92 })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -3.15;
+  floor.position.z = -3;
+  world.add(floor);
+
+  const grid = new THREE.GridHelper(42, 42, 0x36efff, 0x541b79);
+  grid.position.y = -3.12;
+  grid.position.z = -3;
   grid.material.transparent = true;
-  grid.material.opacity = 0.24;
-  group.add(grid);
+  grid.material.opacity = 0.34;
+  world.add(grid);
 
-  // Central energy rings
-  const ringMatA = new THREE.MeshBasicMaterial({ color: 0x00eaff, transparent: true, opacity: 0.38, side: THREE.DoubleSide });
-  const ringMatB = new THREE.MeshBasicMaterial({ color: 0xff24d7, transparent: true, opacity: 0.28, side: THREE.DoubleSide });
+  for (let i = -5; i <= 5; i++) {
+    const strip = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.025, 28),
+      new THREE.MeshBasicMaterial({ color: i % 2 ? 0x31eaff : 0xff31d6, transparent: true, opacity: 0.12 })
+    );
+    strip.rotation.x = -Math.PI / 2;
+    strip.position.set(i * 1.7, -3.105, -5);
+    world.add(strip);
+  }
+
   const rings = [];
-  for (let i = 0; i < 5; i++) {
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(3.6 + i * 0.72, 0.018 + i * 0.004, 6, 128), i % 2 ? ringMatA : ringMatB);
+  for (let i = 0; i < 6; i++) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(3.3 + i * 0.8, 0.018 + i * 0.003, 5, 128),
+      new THREE.MeshBasicMaterial({
+        color: i % 2 ? 0x38efff : 0xff31d6,
+        transparent: true,
+        opacity: 0.20,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      })
+    );
     ring.rotation.x = Math.PI / 2;
-    ring.position.y = -1.6 + i * 0.25;
-    ring.rotation.z = i * 0.18;
-    group.add(ring);
+    ring.position.y = -2.8 + i * 0.12;
+    ring.position.z = -2.5;
+    world.add(ring);
     rings.push(ring);
   }
 
-  // Star / particle field
-  const count = 900;
-  const pos = new Float32Array(count * 3);
-  for (let i = 0; i < count; i++) {
-    pos[i * 3] = (Math.random() - .5) * 42;
-    pos[i * 3 + 1] = (Math.random() - .5) * 22;
-    pos[i * 3 + 2] = (Math.random() - .5) * 42;
+  const STAR_COUNT = 1150;
+  const starPos = new Float32Array(STAR_COUNT * 3);
+  for (let i = 0; i < STAR_COUNT; i++) {
+    starPos[i * 3] = (Math.random() - 0.5) * 48;
+    starPos[i * 3 + 1] = (Math.random() - 0.4) * 26;
+    starPos[i * 3 + 2] = (Math.random() - 0.5) * 50;
   }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.035, transparent: true, opacity: 0.7 }));
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const stars = new THREE.Points(
+    starGeo,
+    new THREE.PointsMaterial({ color: 0xdde9ff, size: 0.045, transparent: true, opacity: 0.72, depthWrite: false })
+  );
   scene.add(stars);
 
-  // Side light pillars
-  for (const x of [-7.4, 7.4]) {
-    const beam = new THREE.Mesh(
-      new THREE.CylinderGeometry(.03, .25, 11, 16, 1, true),
-      new THREE.MeshBasicMaterial({ color: x < 0 ? 0x00eaff : 0xff24d7, transparent: true, opacity: .17, side: THREE.DoubleSide })
-    );
-    beam.position.set(x, 0.5, -3);
-    beam.rotation.z = x < 0 ? -0.16 : 0.16;
-    scene.add(beam);
+  const STREAK_COUNT = 180;
+  const streakPos = new Float32Array(STREAK_COUNT * 6);
+  for (let i = 0; i < STREAK_COUNT; i++) {
+    const x = (Math.random() - 0.5) * 30;
+    const y = (Math.random() - 0.5) * 14;
+    const z = -4 - Math.random() * 25;
+    const o = i * 6;
+    streakPos[o] = x; streakPos[o + 1] = y; streakPos[o + 2] = z;
+    streakPos[o + 3] = x; streakPos[o + 4] = y; streakPos[o + 5] = z + 0.4 + Math.random() * 1.2;
+  }
+  const streakGeo = new THREE.BufferGeometry();
+  streakGeo.setAttribute('position', new THREE.BufferAttribute(streakPos, 3));
+  const streaks = new THREE.LineSegments(
+    streakGeo,
+    new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  scene.add(streaks);
+
+  const cinematic = new THREE.Group();
+  cinematic.visible = false;
+  scene.add(cinematic);
+
+  const textureLoader = new THREE.TextureLoader();
+  const clock = new THREE.Clock();
+  let mode = 'idle';
+  let modeStart = performance.now();
+  let fighterCards = [];
+  let shockRings = [];
+  let cameraShake = 0;
+
+  const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+  const easeOutBack = t => {
+    const c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  };
+
+  function makeTextSprite(text, color = '#ffffff', accent = '#ff35d8', fontSize = 78) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024; canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `900 italic ${fontSize}px Arial, sans-serif`;
+    ctx.lineWidth = 14; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(text, 512, 128);
+    ctx.shadowBlur = 30; ctx.shadowColor = accent;
+    ctx.fillStyle = color; ctx.fillText(text, 512, 128);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.minFilter = THREE.LinearFilter;
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(5.6, 1.4, 1);
+    return sprite;
   }
 
-  let mode = 'idle';
-  let punch = 0;
-  let targetZ = 12.5;
-  let targetY = 3.1;
-  const clock = new THREE.Clock();
+  function disposeGroup(group) {
+    group.traverse(obj => {
+      if (obj.geometry) obj.geometry.dispose?.();
+      if (obj.material) {
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        mats.forEach(mat => { mat.map?.dispose?.(); mat.dispose?.(); });
+      }
+    });
+    while (group.children.length) group.remove(group.children[0]);
+  }
+
+  function makeCard(name, imageUrl, accent, width = 3.05, height = 4.15) {
+    const group = new THREE.Group();
+    const glow = new THREE.Mesh(
+      new THREE.PlaneGeometry(width + 0.45, height + 0.45),
+      new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.19, blending: THREE.AdditiveBlending, depthWrite: false })
+    );
+    glow.position.z = -0.11;
+    group.add(glow);
+
+    const shell = new THREE.Mesh(
+      new THREE.BoxGeometry(width + 0.16, height + 0.16, 0.18),
+      new THREE.MeshStandardMaterial({ color: 0x070911, metalness: 0.88, roughness: 0.16, emissive: accent, emissiveIntensity: 0.14 })
+    );
+    group.add(shell);
+
+    const tex = textureLoader.load(imageUrl);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const photo = new THREE.Mesh(
+      new THREE.PlaneGeometry(width, height),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false })
+    );
+    photo.position.z = 0.101;
+    group.add(photo);
+
+    const plate = new THREE.Mesh(
+      new THREE.PlaneGeometry(width * 0.94, 0.62),
+      new THREE.MeshBasicMaterial({ color: 0x02030a, transparent: true, opacity: 0.90 })
+    );
+    plate.position.set(0, -height * 0.38, 0.112);
+    group.add(plate);
+
+    const nameSprite = makeTextSprite(name, '#ffffff', `#${accent.toString(16).padStart(6,'0')}`, 76);
+    nameSprite.scale.set(width * 1.28, 0.74, 1);
+    nameSprite.position.set(0, -height * 0.38, 0.125);
+    group.add(nameSprite);
+
+    group.userData.glow = glow;
+    return group;
+  }
+
+  function addFighterCard(name, imageUrl, accent, start, target, rotStart, rotTarget, scale = 1) {
+    const card = makeCard(name, imageUrl, accent);
+    card.position.copy(start);
+    card.rotation.y = rotStart;
+    card.scale.setScalar(scale * 0.55);
+    cinematic.add(card);
+    fighterCards.push({ card, start, target, rotStart, rotTarget, scale, phase: Math.random() * Math.PI * 2 });
+    return card;
+  }
+
+  function addShockRing(color, z = 1.5) {
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.55, 0.62, 96),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.95, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })
+    );
+    ring.position.set(0, 0, z);
+    cinematic.add(ring);
+    shockRings.push({ ring, born: performance.now() });
+  }
+
+  function buildMatch(match) {
+    disposeGroup(cinematic);
+    fighterCards = [];
+    shockRings = [];
+    cinematic.visible = true;
+    const img = name => (typeof window.personImage === 'function' ? window.personImage(name) : 'question.png');
+
+    addFighterCard(match.manager, img(match.manager), 0x31efff,
+      new THREE.Vector3(-10.5, -0.1, -5.5), new THREE.Vector3(-3.7, -0.20, 1.0), 1.18, 0.10, 1.04);
+    addFighterCard(match.main, img(match.main), 0xff31d6,
+      new THREE.Vector3(10.5, -0.1, -5.5), new THREE.Vector3(3.7, -0.20, 1.0), -1.18, -0.10, 1.04);
+    addFighterCard(match.sub, img(match.sub), 0xff69e5,
+      new THREE.Vector3(10.0, 3.5, -8), new THREE.Vector3(6.35, 2.55, -0.3), -0.85, -0.20, 0.53);
+    addFighterCard(match.judge, img(match.judge), 0xffdc57,
+      new THREE.Vector3(-10.0, 3.6, -8), new THREE.Vector3(-6.35, 2.55, -0.3), 0.85, 0.20, 0.53);
+
+    const agency = makeTextSprite(match.agency || '', '#ffffff', '#ff31d6', 58);
+    agency.name = 'agencySprite';
+    agency.position.set(0, -2.34, 1.3);
+    agency.scale.set(7.4, 1.25, 1);
+    cinematic.add(agency);
+
+    const vs = makeTextSprite('VS', '#ffffff', '#ff9d1f', 138);
+    vs.name = 'vsSprite';
+    vs.position.set(0, 0.1, 2.0);
+    vs.scale.set(3.8, 1.7, 1);
+    vs.material.opacity = 0;
+    cinematic.add(vs);
+    addShockRing(0xffffff, 1.4);
+  }
 
   function setMode(next) {
     mode = next;
+    modeStart = performance.now();
     document.body.dataset.visualMode = next;
-    if (next === 'spin') {
-      targetZ = 9.6;
-      targetY = 2.5;
-      punch = 0.7;
-    } else if (next === 'reveal') {
-      targetZ = 8.2;
-      targetY = 2.0;
-      punch = 1.25;
-    } else if (next === 'vs') {
-      targetZ = 6.6;
-      targetY = 1.2;
-      punch = 2.2;
-    } else if (next === 'battle') {
-      targetZ = 11.0;
-      targetY = 2.0;
-      punch = 0.5;
-    } else {
-      targetZ = 12.5;
-      targetY = 3.1;
+    if (next === 'vs') cameraShake = 0.18;
+    if (next === 'battle' || next === 'idle') {
+      cinematic.visible = false;
+      streaks.material.opacity = 0;
     }
+  }
+
+  function updateCinematic(now, t) {
+    if (!cinematic.visible) return;
+    const elapsed = (now - modeStart) / 1000;
+    fighterCards.forEach((item, i) => {
+      const p = Math.min(1, elapsed / (0.62 + i * 0.055));
+      const e = easeOutBack(p);
+      item.card.position.lerpVectors(item.start, item.target, e);
+      item.card.rotation.y = THREE.MathUtils.lerp(item.rotStart, item.rotTarget, easeOutCubic(p));
+      const s = item.scale * THREE.MathUtils.lerp(0.55, 1, Math.min(1, e));
+      item.card.scale.setScalar(s);
+      if (p >= 1) item.card.position.y = item.target.y + Math.sin(t * 1.8 + item.phase) * (item.scale < 0.7 ? 0.035 : 0.055);
+      if (item.card.userData.glow) item.card.userData.glow.material.opacity = 0.13 + (Math.sin(t * 4.2 + item.phase) + 1) * 0.045;
+    });
+
+    const vs = cinematic.getObjectByName('vsSprite');
+    if (vs) {
+      const vp = Math.max(0, Math.min(1, (elapsed - 0.36) / 0.42));
+      vs.material.opacity = easeOutCubic(vp);
+      const s = 0.35 + easeOutBack(vp) * 0.65;
+      vs.scale.set(3.8 * s, 1.7 * s, 1);
+      vs.rotation.z = Math.sin(t * 5) * 0.025;
+    }
+
+    const agency = cinematic.getObjectByName('agencySprite');
+    if (agency) {
+      const ap = Math.max(0, Math.min(1, (elapsed - 0.48) / 0.45));
+      agency.material.opacity = ap;
+      agency.position.y = -2.5 + easeOutCubic(ap) * 0.16;
+    }
+
+    streaks.material.opacity = Math.min(0.48, elapsed * 0.65);
+    streaks.position.z += 0.12;
+    if (streaks.position.z > 8) streaks.position.z = 0;
+
+    if (mode === 'vs' && elapsed > 0.62 && shockRings.length < 2) {
+      addShockRing(0xffc26a, 1.5);
+      cameraShake = 0.42;
+    }
+
+    shockRings.forEach(s => {
+      const age = (now - s.born) / 1000;
+      s.ring.scale.setScalar(1 + age * 9);
+      s.ring.material.opacity = Math.max(0, 0.78 - age * 0.8);
+    });
   }
 
   function animate() {
     requestAnimationFrame(animate);
+    const now = performance.now();
     const t = clock.getElapsedTime();
-    const speed = mode === 'spin' ? 1.8 : mode === 'vs' ? 2.6 : 0.35;
+    const elapsed = (now - modeStart) / 1000;
+    const speed = mode === 'spin' ? 2.1 : mode === 'vs' ? 2.9 : 0.42;
+
     rings.forEach((r, i) => {
       r.rotation.z += 0.0015 * speed * (i % 2 ? 1 : -1) * (i + 1);
-      r.scale.setScalar(1 + Math.sin(t * 1.4 + i) * 0.012);
+      r.scale.setScalar(1 + Math.sin(t * 1.3 + i) * 0.014);
     });
-    stars.rotation.y += 0.00035 * speed;
-    group.rotation.y = Math.sin(t * .25) * .04;
+    stars.rotation.y += 0.0003 * speed;
+    world.rotation.y = Math.sin(t * 0.20) * 0.025;
 
-    camera.position.z += (targetZ - camera.position.z) * 0.045;
-    camera.position.y += (targetY - camera.position.y) * 0.045;
-    if (punch > 0.01) {
-      camera.position.x = (Math.random() - .5) * punch * .13;
-      camera.position.y += (Math.random() - .5) * punch * .08;
-      punch *= .91;
+    if (mode === 'vs' && cinematic.visible) {
+      const cp = Math.min(1, elapsed / 1.15);
+      camera.position.z = THREE.MathUtils.lerp(12.6, 8.25, easeOutCubic(cp));
+      camera.position.y = THREE.MathUtils.lerp(1.8, 0.55, easeOutCubic(cp));
+      camera.position.x = Math.sin(elapsed * 1.7) * 0.28 * (1 - cp * 0.5);
+    } else if (mode === 'spin') {
+      camera.position.z += (11.0 - camera.position.z) * 0.045;
+      camera.position.y += (1.5 - camera.position.y) * 0.045;
+      camera.position.x = Math.sin(t * 0.55) * 0.35;
+    } else if (mode === 'battle') {
+      camera.position.z += (12.0 - camera.position.z) * 0.045;
+      camera.position.y += (1.5 - camera.position.y) * 0.045;
+      camera.position.x *= 0.9;
     } else {
-      camera.position.x *= .88;
+      camera.position.z += (12.8 - camera.position.z) * 0.04;
+      camera.position.y += (1.4 - camera.position.y) * 0.04;
+      camera.position.x = Math.sin(t * 0.22) * 0.2;
     }
-    camera.lookAt(0, -0.4, 0);
+
+    if (cameraShake > 0.003) {
+      camera.position.x += (Math.random() - 0.5) * cameraShake;
+      camera.position.y += (Math.random() - 0.5) * cameraShake * 0.55;
+      cameraShake *= 0.88;
+    }
+
+    cyanLight.intensity = 46 + Math.sin(t * 3.0) * 9;
+    magentaLight.intensity = 46 + Math.sin(t * 3.0 + Math.PI) * 9;
+    updateCinematic(now, t);
+    camera.lookAt(0, -0.35, 0.7);
     renderer.render(scene, camera);
   }
   animate();
@@ -129,11 +362,11 @@
   });
 
   addEventListener('emnet:spin-start', () => setMode('spin'));
-  addEventListener('emnet:selection-revealed', () => setMode('reveal'));
+  addEventListener('emnet:selection-revealed', e => { buildMatch(e.detail || {}); setMode('reveal'); });
   addEventListener('emnet:vs-start', () => setMode('vs'));
   addEventListener('emnet:battle-enter', () => setMode('battle'));
   addEventListener('emnet:back-select', () => setMode('idle'));
   addEventListener('emnet:reset', () => setMode('idle'));
 
-  window.EMNET3D = { setMode };
+  window.EMNET3D = { setMode, buildMatch };
 })();

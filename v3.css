@@ -1,0 +1,27 @@
+/* ===== EMNET ROLEPLAY BATTLE V3: TRUE 3D CINEMATIC ===== */
+body[data-visual-mode="reveal"] #three-stage,
+body[data-visual-mode="vs"] #three-stage {
+  z-index: 10020;
+  opacity: 1;
+  background:
+    radial-gradient(ellipse at 50% 36%, rgba(40, 16, 72, .38), transparent 42%),
+    radial-gradient(circle at 18% 50%, rgba(0, 222, 255, .13), transparent 28%),
+    radial-gradient(circle at 82% 50%, rgba(255, 0, 207, .15), transparent 28%),
+    linear-gradient(180deg, rgba(1, 2, 8, .95), rgba(3, 1, 8, .98));
+}
+body[data-visual-mode="vs"] #vs-splash-overlay .splash-char,
+body[data-visual-mode="vs"] #vs-splash-overlay .splash-judge,
+body[data-visual-mode="vs"] #vs-splash-overlay .splash-sub,
+body[data-visual-mode="vs"] #vs-splash-overlay .splash-vs-logo,
+body[data-visual-mode="vs"] #vs-splash-overlay .splash-bg-left,
+body[data-visual-mode="vs"] #vs-splash-overlay .splash-bg-right { opacity: 0 !important; }
+body[data-visual-mode="reveal"] .select-screen,
+body[data-visual-mode="vs"] .select-screen { filter: brightness(.28) saturate(.7); }
+body[data-visual-mode="spin"] #three-stage { filter: saturate(1.2) contrast(1.08); }
+.v2-brand::after { content: " · TRUE 3D CINEMATIC"; color: rgba(255,255,255,.45); }
+body[data-visual-mode="spin"] .left-panel .player-tag,
+body[data-visual-mode="spin"] .right-panel .player-tag { text-shadow: 0 0 10px currentColor, 0 0 32px currentColor; }
+@media (max-width: 1100px), (prefers-reduced-motion: reduce) {
+  body[data-visual-mode="reveal"] #three-stage,
+  body[data-visual-mode="vs"] #three-stage { opacity: .92; }
+}
