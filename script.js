@@ -42,6 +42,19 @@ function personImage(name) {
   return PERSON_IMAGE[name] || 'question.png';
 }
 
+function fighterArt(name) {
+  const profile = window.getFighterProfile ? window.getFighterProfile(name) : null;
+  return profile?.art || personImage(name);
+}
+
+function hasFighterArt(name) {
+  const profile = window.getFighterProfile ? window.getFighterProfile(name) : null;
+  return Boolean(profile?.art);
+}
+
+window.fighterArt = fighterArt;
+window.hasFighterArt = hasFighterArt;
+
 window.PERSON_IMAGE = PERSON_IMAGE;
 window.personImage = personImage;
 
@@ -166,11 +179,27 @@ class Slot {
     fullData.forEach(text => {
       const div = document.createElement('div');
       if (this.type === 'person') {
-        div.className = 'person-item';
-        div.innerHTML = `<img src="${personImage(text)}" onerror="this.style.opacity='0.1'"><div class="name-bg">${text}</div>`;
+        const profile = window.getFighterProfile ? window.getFighterProfile(text) : null;
+        const fighter = hasFighterArt(text);
+        div.className = `person-item${fighter ? ' fighter-slot-item' : ''}`;
+        div.dataset.name = text;
+        div.innerHTML = fighter
+          ? `<img class="fighter-slot-art" src="${fighterArt(text)}" onerror="this.src='${personImage(text)}'">
+             <div class="fighter-slot-shade"></div>
+             <div class="fighter-slot-code">${profile.codename}</div>
+             <div class="name-bg">${text}</div>`
+          : `<img src="${personImage(text)}" onerror="this.style.opacity='0.1'"><div class="name-bg">${text}</div>`;
       } else if (this.type === 'person-sub') {
-        div.className = 'person-item-sub';
-        div.innerHTML = `<img src="${personImage(text)}" onerror="this.style.opacity='0.1'"><div class="name-bg">${text}</div>`;
+        const profile = window.getFighterProfile ? window.getFighterProfile(text) : null;
+        const fighter = hasFighterArt(text);
+        div.className = `person-item-sub${fighter ? ' fighter-slot-item fighter-slot-item-sub' : ''}`;
+        div.dataset.name = text;
+        div.innerHTML = fighter
+          ? `<img class="fighter-slot-art" src="${fighterArt(text)}" onerror="this.src='${personImage(text)}'">
+             <div class="fighter-slot-shade"></div>
+             <div class="fighter-slot-code">${profile.codename}</div>
+             <div class="name-bg">${text}</div>`
+          : `<img src="${personImage(text)}" onerror="this.style.opacity='0.1'"><div class="name-bg">${text}</div>`;
       } else {
         div.className = 'agency-item';
         div.textContent = text;
@@ -231,7 +260,15 @@ class Slot {
         this.reel.style.transition = 'none';
         this.reel.style.transform = `translateY(${finalY}px)`;
         this.reel.offsetHeight;
-        let selectedText = (this.type.includes('person')) ? this.reel.children[targetIndex].querySelector('.name-bg').textContent : this.reel.children[targetIndex].textContent;
+        const winnerCard = this.reel.children[targetIndex];
+        if (winnerCard && this.type.includes('person')) {
+          winnerCard.classList.add('slot-winner-card');
+          const profile = window.getFighterProfile ? window.getFighterProfile(forceTargetText) : null;
+          if (profile?.art) {
+            window.EMNETCore?.emit('fighter-slot-awaken', { name: forceTargetText, profile, slotType: this.type });
+          }
+        }
+        let selectedText = (this.type.includes('person')) ? winnerCard.querySelector('.name-bg').textContent : winnerCard.textContent;
         resolve(selectedText);
       }, duration + 30);
     });
@@ -270,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
   dataManagers.forEach(name => {
     const div = document.createElement('div');
     div.className = 'grid-item';
-    div.innerHTML = `<img src="${personImage(name)}" onerror="this.style.opacity='0.2'"><div class="name-label">${name}</div>`;
+    div.innerHTML = `<img src="${fighterArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'"><div class="name-label">${name}</div>`;
     iconGridTop.appendChild(div);
   });
 
@@ -278,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const div = document.createElement('div');
     div.className = 'grid-item';
     div.innerHTML = `
-      <img src="${personImage(name)}" onerror="this.style.opacity='0.2'">
+      <img src="${fighterArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'">
       <div class="eliminated-marker"><img src="eliminated.png" alt="eliminated"></div>
       <div class="name-label">${name}</div>
     `;
@@ -293,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     div.className = 'judge-item';
     div.dataset.name = name;
     div.innerHTML = `
-      <img src="${personImage(name)}" onerror="this.style.opacity='0.2'">
+      <img src="${fighterArt(name)}" class="${hasFighterArt(name) ? 'fighter-grid-art' : ''}" onerror="this.src='${personImage(name)}'">
       <div class="eliminated-marker"><img src="eliminated.png" alt="eliminated"></div>
       <div class="name-label">${name}</div>
     `;
@@ -766,11 +803,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('battle-judge-name').textContent = judgeWinner;
 
     const splashOverlay = document.getElementById('vs-splash-overlay');
-    document.getElementById('splash-left-img').src = personImage(results[0]);
+    document.getElementById('splash-left-img').src = fighterArt(results[0]);
     document.getElementById('splash-left-name').textContent = results[0];
-    document.getElementById('splash-right-img').src = personImage(results[1]);
+    document.getElementById('splash-right-img').src = fighterArt(results[1]);
     document.getElementById('splash-right-name').textContent = results[1];
-    document.getElementById('splash-sub-img').src = personImage(results[2]);
+    document.getElementById('splash-sub-img').src = fighterArt(results[2]);
     document.getElementById('splash-sub-name').textContent = results[2];
 
     splashOverlay.classList.add('is-active');

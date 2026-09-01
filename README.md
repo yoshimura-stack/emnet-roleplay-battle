@@ -42,3 +42,10 @@ Battle fighters are rendered inside the Three.js scene as layered cutouts with p
 - Perspective-heavy Three.js arena with deep tunnel frames, octagonal platform, energy towers and 3D camera orbit
 - Comic-book HUD / halftone styling
 - Existing game logic and Cloudflare/GitHub deployment flow preserved
+
+## V6 Comic Fighter Roulette
+- Pilot fighter art integrated for 芳村 / 大森 / 小嶋 / 荒木.
+- Character roulette shows full comic fighter cards when artwork exists.
+- STOP triggers an "awakening" flash / zoom / codename punch-in.
+- VS splash uses comic fighter art for supported characters.
+- Unsupported members automatically fall back to the existing photo assets.

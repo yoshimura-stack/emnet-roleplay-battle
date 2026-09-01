@@ -1,0 +1,42 @@
+/* ===== V6 COMIC FIGHTER ROULETTE ===== */
+.v2-brand::after{content:" · V6 COMIC FIGHTER ROULETTE" !important}
+
+/* True fighter-card roulette for the four pilot characters */
+.fighter-slot-item{position:relative!important;overflow:hidden!important;background:#05070d!important;isolation:isolate;perspective:900px}
+.fighter-slot-item .fighter-slot-art{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 42%!important;filter:saturate(1.12) contrast(1.06);transform:scale(1.025);z-index:0!important}
+.fighter-slot-item .fighter-slot-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.02) 35%,rgba(0,0,0,.34) 65%,rgba(0,0,0,.93) 100%),linear-gradient(90deg,rgba(0,0,0,.18),transparent 30% 70%,rgba(0,0,0,.18));pointer-events:none}
+.fighter-slot-item .fighter-slot-code{position:absolute;left:18px;bottom:48px;z-index:3;color:#fff;font-family:Impact,"Arial Black",sans-serif;font-style:italic;font-size:clamp(22px,2.05vw,44px);line-height:.9;letter-spacing:.025em;text-align:left;text-shadow:3px 4px 0 #000,0 0 20px currentColor;transform:skewX(-7deg)}
+.fighter-slot-item .name-bg{z-index:4!important;background:linear-gradient(90deg,rgba(0,0,0,.95),rgba(0,0,0,.55),rgba(0,0,0,.9))!important;border-top:1px solid rgba(255,255,255,.35)!important;text-shadow:0 2px 4px #000!important}
+.fighter-slot-item::before{content:"FIGHTER";position:absolute;right:10px;top:10px;z-index:3;padding:4px 8px;border:1px solid rgba(255,255,255,.72);background:rgba(0,0,0,.58);color:#fff;font:900 9px/1 Arial,sans-serif;letter-spacing:.18em;transform:skewX(-9deg)}
+.fighter-slot-item::after{content:"";position:absolute;inset:-30%;z-index:2;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.24) 47%,transparent 55%);transform:translateX(-70%) rotate(5deg);animation:v6CardSheen 2.1s linear infinite;pointer-events:none}
+@keyframes v6CardSheen{to{transform:translateX(72%) rotate(5deg)}}
+
+/* Smaller sub-attacker slot keeps the art readable. */
+.fighter-slot-item-sub .fighter-slot-code{left:9px;bottom:28px;font-size:clamp(12px,1.15vw,20px)}
+.fighter-slot-item-sub::before{font-size:7px;right:5px;top:5px;padding:3px 5px}
+
+/* Hard STOP: card "awakens" instead of simply freezing. */
+.slot-winner-card{z-index:9!important;animation:v6WinnerAwaken .8s cubic-bezier(.16,1,.3,1) both!important;box-shadow:inset 0 0 0 3px #fff,0 0 28px #fff,0 0 65px currentColor!important}
+.slot-winner-card .fighter-slot-art{animation:v6WinnerArt .8s cubic-bezier(.16,1,.3,1) both!important}
+.slot-winner-card .fighter-slot-code{animation:v6CodePunch .7s cubic-bezier(.16,1,.3,1) both!important}
+@keyframes v6WinnerAwaken{0%{filter:brightness(1);transform:scale(1)}38%{filter:brightness(2.3);transform:scale(1.025)}100%{filter:brightness(1.13);transform:scale(1)}}
+@keyframes v6WinnerArt{0%{transform:scale(1.02)}45%{transform:scale(1.17) translateY(-1%)}100%{transform:scale(1.085)}}
+@keyframes v6CodePunch{0%{opacity:.1;transform:translateX(-35px) skewX(-7deg) scale(.8)}60%{opacity:1;transform:translateX(4px) skewX(-7deg) scale(1.08)}100%{transform:translateX(0) skewX(-7deg) scale(1)}}
+
+/* The pilot roster thumbnails now feel like an arcade select grid. */
+.grid-item .fighter-grid-art{object-fit:cover!important;object-position:center 28%!important;filter:saturate(1.1) contrast(1.08)}
+.grid-item:has(.fighter-grid-art){background:#080a10;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 0 12px rgba(255,255,255,.07)}
+
+/* VS splash uses the full comic character art instead of returning to headshots. */
+#vs-splash-overlay .splash-left img,#vs-splash-overlay .splash-right img{object-fit:cover!important;object-position:center 38%!important;filter:saturate(1.12) contrast(1.08) drop-shadow(0 0 22px currentColor)}
+#vs-splash-overlay .splash-char{overflow:hidden}
+#vs-splash-overlay.is-animating .splash-left img{animation:v6VsLeft 1.2s cubic-bezier(.13,.8,.17,1) both}
+#vs-splash-overlay.is-animating .splash-right img{animation:v6VsRight 1.2s cubic-bezier(.13,.8,.17,1) both}
+@keyframes v6VsLeft{0%{transform:translateX(-18%) scale(1.22) rotateY(16deg);filter:brightness(2) blur(7px)}100%{transform:translateX(0) scale(1.06);filter:brightness(1) blur(0)}}
+@keyframes v6VsRight{0%{transform:translateX(18%) scale(1.22) rotateY(-16deg);filter:brightness(2) blur(7px)}100%{transform:translateX(0) scale(1.06);filter:brightness(1) blur(0)}}
+
+/* Make the large roulette windows feel like arcade cabinets. */
+#slot-manager,#slot-main-attacker{border:2px solid rgba(255,255,255,.34)!important;box-shadow:0 0 0 1px #000,0 0 26px rgba(255,255,255,.08),inset 0 0 45px rgba(0,0,0,.8)!important;background:#03050a!important}
+#slot-manager::after,#slot-main-attacker::after{content:"";position:absolute;inset:0;z-index:8;pointer-events:none;background:linear-gradient(90deg,rgba(0,255,255,.11),transparent 18% 82%,rgba(255,0,238,.11));mix-blend-mode:screen}
+
+@media(max-width:1100px){.fighter-slot-item .fighter-slot-code{font-size:26px;bottom:39px}.fighter-slot-item-sub .fighter-slot-code{font-size:13px;bottom:25px}}
